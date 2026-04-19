@@ -1,0 +1,46 @@
+# Secrets and credentials
+.env
+.env.*
+.streamlit/secrets.toml
+
+# Python cache and bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+.venv/
+venv/
+env/
+ENV/
+.python-version
+
+# Testing and static analysis cache
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Build and packaging artifacts
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+
+# Jupyter temporary files
+.ipynb_checkpoints/
+*.nbconvert.ipynb
+
+# Local logs and reports
+logs/
+*.log
+
+# Editor and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Generated model artifacts (optional to push)
+artifacts/*
+!artifacts/.gitkeep
+
