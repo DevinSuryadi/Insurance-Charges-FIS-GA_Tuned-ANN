@@ -1,4 +1,5 @@
 streamlit
+altair
 numpy
 pandas
 scikit-learn
