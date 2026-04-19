@@ -5,6 +5,8 @@
 Aplikasi ini merupakan sistem prediksi biaya asuransi kesehatan berbasis antarmuka Streamlit.
 Pengguna dapat memasukkan nilai usia, BMI, dan status perokok, lalu sistem menampilkan estimasi biaya asuransi.
 
+Aplikasi dapat diakses pada tautan: https://insurance-charges-fis.streamlit.app/ 
+
 Pengembangan aplikasi dilakukan untuk membandingkan kinerja tiga pendekatan:
 
 1. FIS Manual (berbasis intuisi pakar)
@@ -34,6 +36,8 @@ Aplikasi dapat melakukan fungsi berikut:
 2. Menampilkan prediksi biaya asuransi dari tiga model (Manual FIS, GA-Tuned FIS, NeuroFuzzy ANN).
 3. Menampilkan tabel komparasi hasil prediksi antar metode.
 4. Menampilkan ringkasan metrik evaluasi model pada data uji (jika file metrics tersedia).
+5. Menampilkan EDA dataset (distribusi fitur, relasi fitur-target, dan ringkasan kategori smoker).
+6. Menampilkan evaluasi batch dan insight (error summary serta actual vs predicted).
 
 ## 4. Persyaratan Sistem
 
@@ -51,11 +55,12 @@ Aplikasi dapat melakukan fungsi berikut:
 Library mengikuti file requirements.txt:
 
 1. streamlit
-2. numpy
-3. pandas
-4. scikit-learn
-5. torch
-6. joblib
+2. altair
+3. numpy
+4. pandas
+5. scikit-learn
+6. torch
+7. joblib
 
 ## 5. Langkah Instalasi
 
@@ -91,6 +96,6 @@ python scripts/train_and_save_artifacts.py
 
 Gunakan perintah:
 
-python -m streamlit run apps/streamlit_app.py
+python -m streamlit run apps/app.py
 
 Setelah berjalan, aplikasi dapat diakses melalui browser di alamat lokal Streamlit (umumnya http://localhost:8501).
