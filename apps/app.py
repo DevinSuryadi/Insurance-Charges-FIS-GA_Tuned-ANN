@@ -228,7 +228,7 @@ def render_tab_perbandingan(df, scaler_X, scaler_y, manual_fis, ga_fis, ann_mode
     st.altair_chart(curve_chart, use_container_width=True)
 
     render_section_divider()
-    render_section_marker("Actual vs Predicted (Sejajar)")
+    render_section_marker("Actual vs Predicted")
     st.caption("Perbandingan prediksi terhadap nilai actual untuk ketiga model pada seluruh dataset.")
 
     eval_df = df[["age", "bmi", "smoker", "charges"]].reset_index(drop=True)
