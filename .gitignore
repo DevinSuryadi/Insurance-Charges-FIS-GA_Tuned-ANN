@@ -40,7 +40,3 @@ logs/
 .DS_Store
 Thumbs.db
 
-# Generated model artifacts (optional to push)
-artifacts/*
-!artifacts/.gitkeep
-
