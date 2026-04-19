@@ -1,0 +1,113 @@
+:root {
+    --bg: #0b1220;
+    --surface: #111a2b;
+    --surface-2: #162238;
+    --text: #e7edf7;
+    --muted: #9aa7b7;
+    --line: #2a3953;
+    --accent: #6ea8fe;
+}
+
+html,
+body,
+[data-testid="stAppViewContainer"],
+.stApp {
+    background: var(--bg);
+    color: var(--text);
+}
+
+[data-testid="stHeader"] {
+    background: rgba(11, 18, 32, 0.92);
+    border-bottom: 1px solid var(--line);
+}
+
+.main .block-container {
+    max-width: 1200px;
+    padding-top: 1.1rem;
+    padding-bottom: 2.2rem;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    color: var(--text);
+    letter-spacing: 0.1px;
+}
+
+p,
+label,
+span {
+    color: var(--text);
+}
+
+[data-testid="stTabs"] [role="tablist"] {
+    gap: 0.45rem;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 1.15rem;
+}
+
+[data-testid="stTabs"] [role="tab"] {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-bottom: none;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    padding: 0.5rem 0.9rem;
+    font-weight: 600;
+}
+
+[data-testid="stTabs"] [role="tab"][aria-selected="true"] {
+    background: var(--surface-2);
+    color: var(--accent);
+    border-color: var(--accent);
+}
+
+[data-testid="stMetric"] {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 0.55rem 0.75rem;
+}
+
+[data-testid="stDataFrame"],
+[data-testid="stTable"] {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--surface);
+}
+
+details[data-testid="stExpander"] {
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--surface);
+}
+
+hr {
+    border: none;
+    border-top: 1px solid var(--line);
+}
+
+[data-baseweb="select"] > div,
+[data-baseweb="input"] > div,
+.stNumberInput > div > div,
+.stSlider,
+.stTextInput > div > div,
+.stTextArea textarea {
+    background: var(--surface);
+}
+
+.stCaption,
+[data-testid="stCaptionContainer"] p {
+    color: var(--muted);
+}
+
+[data-testid="stMarkdownContainer"] h3 {
+    margin-top: 0.2rem;
+    margin-bottom: 0.3rem;
+}
+
+[data-testid="stVerticalBlock"] > div:has(> [data-testid="stMetric"]) {
+    gap: 0.8rem;
+}

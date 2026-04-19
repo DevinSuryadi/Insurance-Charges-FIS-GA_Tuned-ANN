@@ -22,6 +22,23 @@ st.set_page_config(page_title="Insurance Neuro-Fuzzy", page_icon=":bar_chart:", 
 PROJECT_DIR = ROOT_DIR
 ARTIFACT_DIR = PROJECT_DIR / "artifacts"
 DATASET_PATH = PROJECT_DIR / "insurance.csv"
+STYLE_PATH = PROJECT_DIR / "apps" / "style" / "style.css"
+
+
+def apply_custom_style():
+    if STYLE_PATH.exists():
+        with open(STYLE_PATH, "r", encoding="utf-8") as css_file:
+            st.markdown(f"<style>{css_file.read()}</style>", unsafe_allow_html=True)
+
+
+def render_section_marker(title, subtitle=""):
+    st.markdown(f"### {title}")
+    if subtitle:
+        st.caption(subtitle)
+
+
+def render_section_divider():
+    st.divider()
 
 
 @st.cache_resource
@@ -214,9 +231,12 @@ def compute_batch_error_table(batch_df):
 
 
 def render_tab_perbandingan(metrics_payload, scaler_X, scaler_y, manual_fis, ga_fis, ann_model):
-    st.subheader("Perbandingan Model")
+    render_section_marker(
+        "Perbandingan Model",
+        "Halaman utama untuk membandingkan prediksi, metrik, dan simulasi ketiga pendekatan.",
+    )
 
-    st.markdown("#### Perbandingan Prediksi pada Profil Input")
+    render_section_marker("Perbandingan Prediksi pada Profil Input")
     input_col1, input_col2, input_col3 = st.columns(3)
     age = input_col1.slider("Age", min_value=18, max_value=65, value=35)
     bmi = input_col2.slider("BMI", min_value=15.0, max_value=55.0, value=30.0, step=0.1)
@@ -243,15 +263,19 @@ def render_tab_perbandingan(metrics_payload, scaler_X, scaler_y, manual_fis, ga_
     st.dataframe(pred_df, use_container_width=True, hide_index=True)
     st.altair_chart(chart_pred_bar(pred_df), use_container_width=True)
 
+    render_section_divider()
+
     metrics_df = get_metrics_frame(metrics_payload)
     if metrics_df is None:
         st.warning("metrics.json belum tersedia. Jalankan: python scripts/train_and_save_artifacts.py")
     else:
-        st.markdown("#### Metrik Test")
+        render_section_marker("Metrik Test")
         st.dataframe(metrics_df, use_container_width=True, hide_index=True)
         st.altair_chart(chart_error_metrics(metrics_df), use_container_width=True)
 
-    st.markdown("#### Simulasi Kurva Prediksi")
+    render_section_divider()
+
+    render_section_marker("Simulasi Kurva Prediksi")
     st.caption("Lihat bagaimana prediksi berubah terhadap rentang Age atau BMI. Nilai tetap mengikuti profil input di atas.")
 
     sweep_feature = st.selectbox("Sumbu simulasi", options=["Age", "BMI"], index=0)
@@ -301,8 +325,10 @@ def render_tab_perbandingan(metrics_payload, scaler_X, scaler_y, manual_fis, ga_
 
 
 def render_tab_eda(df):
-    st.subheader("EDA Dataset")
-    st.caption("Eksplorasi data insurance: statistik dasar, distribusi, dan relasi fitur terhadap charges.")
+    render_section_marker(
+        "EDA Dataset",
+        "Eksplorasi data insurance: statistik dasar, distribusi, dan relasi fitur terhadap charges.",
+    )
 
     c1, c2, c3, c4 = st.columns(4)
     c1.metric("Rows", f"{len(df):,}")
@@ -318,13 +344,15 @@ def render_tab_eda(df):
         st.markdown("**Missing values**")
         st.dataframe(missing_df, use_container_width=True)
 
-    st.markdown("#### Distribusi Fitur")
+    render_section_divider()
+    render_section_marker("Distribusi Fitur")
     dist_c1, dist_c2, dist_c3 = st.columns(3)
     dist_c1.altair_chart(chart_distribution(df, "age", "Age", bins=20), use_container_width=True)
     dist_c2.altair_chart(chart_distribution(df, "bmi", "BMI", bins=20), use_container_width=True)
     dist_c3.altair_chart(chart_distribution(df, "charges", "Charges", bins=30), use_container_width=True)
 
-    st.markdown("#### Relasi Fitur vs Charges")
+    render_section_divider()
+    render_section_marker("Relasi Fitur vs Charges")
     scatter_df = df.copy()
     scatter_df["smoker_label"] = np.where(scatter_df["smoker"] >= 0.5, "Smoker", "Non-Smoker")
 
@@ -356,7 +384,8 @@ def render_tab_eda(df):
     )
     sc2.altair_chart(bmi_scatter, use_container_width=True)
 
-    st.markdown("#### Agregasi Charges berdasarkan Status Smoker")
+    render_section_divider()
+    render_section_marker("Agregasi Charges berdasarkan Status Smoker")
     smoker_summary = (
         scatter_df.groupby("smoker_label", as_index=False)
         .agg(
@@ -383,8 +412,10 @@ def render_tab_eda(df):
 
 
 def render_tab_batch_eval(df, scaler_X, scaler_y, manual_fis, ga_fis, ann_model):
-    st.subheader("Evaluasi Batch dan Insight")
-    st.caption("Bandingkan prediksi ketiga model terhadap nilai actual pada sampel dataset.")
+    render_section_marker(
+        "Evaluasi Batch dan Insight",
+        "Bandingkan prediksi ketiga model terhadap nilai actual pada sampel dataset.",
+    )
 
     sample_size = st.slider(
         "Jumlah data evaluasi",
@@ -406,7 +437,8 @@ def render_tab_batch_eval(df, scaler_X, scaler_y, manual_fis, ga_fis, ann_model)
 
     batch_df = st.session_state["batch_eval_df"]
     err_df = compute_batch_error_table(batch_df)
-    st.markdown("#### Ringkasan Error")
+    render_section_divider()
+    render_section_marker("Ringkasan Error")
     st.dataframe(err_df.round(4), use_container_width=True, hide_index=True)
 
     err_chart_df = err_df.melt(id_vars=["Method"], value_vars=["MAE (USD)", "RMSE (USD)"], var_name="Metric", value_name="Value")
@@ -424,7 +456,8 @@ def render_tab_batch_eval(df, scaler_X, scaler_y, manual_fis, ga_fis, ann_model)
     )
     st.altair_chart(err_chart, use_container_width=True)
 
-    st.markdown("#### Actual vs Predicted")
+    render_section_divider()
+    render_section_marker("Actual vs Predicted")
     selected_model = st.selectbox(
         "Pilih model",
         options=["Manual FIS", "GA-Tuned FIS", "NeuroFuzzy ANN"],
@@ -454,12 +487,14 @@ def render_tab_batch_eval(df, scaler_X, scaler_y, manual_fis, ga_fis, ann_model)
     diagonal = alt.Chart(line_df).mark_line(strokeDash=[8, 6], color="#111111").encode(x="x:Q", y="y:Q")
     st.altair_chart((points + diagonal).properties(height=380), use_container_width=True)
 
-    st.markdown("#### Sampel Hasil Prediksi")
+    render_section_divider()
+    render_section_marker("Sampel Hasil Prediksi")
     preview_cols = ["age", "bmi", "smoker", "charges", "Manual FIS", "GA-Tuned FIS", "NeuroFuzzy ANN"]
     st.dataframe(batch_df[preview_cols].head(20).round(2), use_container_width=True)
 
 
 def main():
+    apply_custom_style()
     st.title("Insurance Charges Prediction Dashboard")
     st.caption("Deployment model Manual FIS, GA-Tuned FIS, dan NeuroFuzzy ANN dengan navigasi tab.")
 
