@@ -147,7 +147,6 @@ def chart_distribution(df, col_name, title, bins=30):
 def render_tab_perbandingan(df, scaler_X, scaler_y, manual_fis, ga_fis, ann_model):
     render_section_marker(
         "Perbandingan Model",
-        "Halaman utama untuk membandingkan hasil prediksi dan simulasi ketiga pendekatan.",
     )
 
     render_section_marker("Perbandingan Prediksi pada Profil Input")
@@ -365,7 +364,7 @@ def render_tab_eda(df):
 def main():
     apply_custom_style()
     st.title("Insurance Charges Prediction Dashboard")
-    st.caption("Deployment model Manual FIS, GA-Tuned FIS, dan NeuroFuzzy ANN dengan navigasi tab.")
+    st.caption("Prediksi Insurance Charges dengan model Manual FIS, GA-Tuned FIS, dan NeuroFuzzy ANN.")
 
     try:
         scaler_X, scaler_y, manual_fis, ga_fis, ann_model, _metrics = load_artifacts()
