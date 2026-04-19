@@ -34,10 +34,8 @@ Aplikasi dapat melakukan fungsi berikut:
 
 1. Menerima input pengguna: usia, BMI, dan status perokok.
 2. Menampilkan prediksi biaya asuransi dari tiga model (Manual FIS, GA-Tuned FIS, NeuroFuzzy ANN).
-3. Menampilkan tabel komparasi hasil prediksi antar metode.
-4. Menampilkan ringkasan metrik evaluasi model pada data uji (jika file metrics tersedia).
-5. Menampilkan EDA dataset (distribusi fitur, relasi fitur-target, dan ringkasan kategori smoker).
-6. Menampilkan evaluasi batch dan insight (error summary serta actual vs predicted).
+3. Menampilkan ringkasan metrik evaluasi model pada data uji.
+4. Menampilkan EDA dataset (distribusi fitur, relasi fitur-target, dan ringkasan kategori smoker).
 
 ## 4. Persyaratan Sistem
 

@@ -22,7 +22,7 @@ st.set_page_config(page_title="Insurance Neuro-Fuzzy", page_icon=":bar_chart:", 
 PROJECT_DIR = ROOT_DIR
 ARTIFACT_DIR = PROJECT_DIR / "artifacts"
 DATASET_PATH = PROJECT_DIR / "insurance.csv"
-STYLE_PATH = PROJECT_DIR / "apps" / "style" / "style.css"
+STYLE_PATH = PROJECT_DIR / "apps" / "Style" / "style.css"
 
 
 def apply_custom_style():
@@ -39,6 +39,22 @@ def render_section_marker(title, subtitle=""):
 
 def render_section_divider():
     st.divider()
+
+
+def apply_chart_theme(chart):
+    return (
+        chart.configure(background="white")
+        .configure_view(fill="white", stroke="#e5e7eb")
+        .configure_axis(
+            labelColor="#111827",
+            titleColor="#111827",
+            gridColor="#e5e7eb",
+            domainColor="#d1d5db",
+            tickColor="#d1d5db",
+        )
+        .configure_legend(labelColor="#111827", titleColor="#111827")
+        .configure_title(color="#111827")
+    )
 
 
 @st.cache_resource
@@ -115,90 +131,8 @@ def predict_models_on_frame(features_df, scaler_X, scaler_y, manual_fis, ga_fis,
     )
 
 
-def get_metrics_frame(metrics_payload):
-    if not metrics_payload or "metrics" not in metrics_payload:
-        return None
-
-    rows = []
-    mapping = {
-        "manual": "Manual FIS",
-        "ga": "GA-Tuned FIS",
-        "ann": "NeuroFuzzy ANN",
-    }
-
-    for key, label in mapping.items():
-        m = metrics_payload["metrics"].get(key, {})
-        rows.append(
-            {
-                "Method": label,
-                "R2 (norm)": round(m.get("R2_norm", float("nan")), 4),
-                "RMSE (USD)": round(m.get("RMSE_usd", float("nan")), 2),
-                "MAE (USD)": round(m.get("MAE_usd", float("nan")), 2),
-            }
-        )
-
-    return pd.DataFrame(rows)
-
-
-def chart_pred_bar(pred_df):
-    chart_df = pred_df.rename(columns={"Predicted Charges (USD)": "Predicted Charges"})
-    return (
-        alt.Chart(chart_df)
-        .mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6)
-        .encode(
-            x=alt.X("Method:N", sort="-y", title="Model"),
-            y=alt.Y("Predicted Charges:Q", title="Predicted Charges (USD)"),
-            color=alt.Color("Method:N", legend=None),
-            tooltip=["Method", alt.Tooltip("Predicted Charges:Q", format=",.2f")],
-        )
-        .properties(height=320)
-    )
-
-
-def chart_grouped_metrics(metrics_df):
-    chart_df = metrics_df.melt(
-        id_vars=["Method"],
-        value_vars=["R2 (norm)", "RMSE (USD)", "MAE (USD)"],
-        var_name="Metric",
-        value_name="Value",
-    )
-    return (
-        alt.Chart(chart_df)
-        .mark_bar(cornerRadiusTopLeft=4, cornerRadiusTopRight=4)
-        .encode(
-            x=alt.X("Metric:N", title="Metric"),
-            y=alt.Y("Value:Q", title="Value"),
-            color=alt.Color("Method:N", title="Method"),
-            column=alt.Column("Method:N", title=None),
-            tooltip=["Method", "Metric", alt.Tooltip("Value:Q", format=",.4f")],
-        )
-        .properties(height=280)
-    )
-
-
-def chart_error_metrics(metrics_df):
-    chart_df = metrics_df.melt(
-        id_vars=["Method"],
-        value_vars=["RMSE (USD)", "MAE (USD)"],
-        var_name="Metric",
-        value_name="Value",
-    )
-    return (
-        alt.Chart(chart_df)
-        .mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6)
-        .encode(
-            x=alt.X("Method:N", title="Model"),
-            y=alt.Y("Value:Q", title="Error (USD)"),
-            color=alt.Color("Metric:N", title="Metric"),
-            xOffset="Metric:N",
-            tooltip=["Method", "Metric", alt.Tooltip("Value:Q", format=",.2f")],
-        )
-        .properties(height=320)
-    )
-
-
 def chart_distribution(df, col_name, title, bins=30):
-    return (
+    return apply_chart_theme(
         alt.Chart(df)
         .mark_bar()
         .encode(
@@ -210,30 +144,10 @@ def chart_distribution(df, col_name, title, bins=30):
     )
 
 
-def compute_batch_error_table(batch_df):
-    actual = batch_df["charges"].to_numpy()
-    rows = []
-    for model_col in ["Manual FIS", "GA-Tuned FIS", "NeuroFuzzy ANN"]:
-        pred = batch_df[model_col].to_numpy()
-        abs_err = np.abs(actual - pred)
-        sq_err = (actual - pred) ** 2
-        sst = np.sum((actual - np.mean(actual)) ** 2)
-        r2 = 1.0 - (np.sum(sq_err) / sst if sst > 0 else np.nan)
-        rows.append(
-            {
-                "Method": model_col,
-                "MAE (USD)": float(np.mean(abs_err)),
-                "RMSE (USD)": float(np.sqrt(np.mean(sq_err))),
-                "R2": float(r2),
-            }
-        )
-    return pd.DataFrame(rows)
-
-
-def render_tab_perbandingan(metrics_payload, scaler_X, scaler_y, manual_fis, ga_fis, ann_model):
+def render_tab_perbandingan(df, scaler_X, scaler_y, manual_fis, ga_fis, ann_model):
     render_section_marker(
         "Perbandingan Model",
-        "Halaman utama untuk membandingkan prediksi, metrik, dan simulasi ketiga pendekatan.",
+        "Halaman utama untuk membandingkan hasil prediksi dan simulasi ketiga pendekatan.",
     )
 
     render_section_marker("Perbandingan Prediksi pada Profil Input")
@@ -247,31 +161,22 @@ def render_tab_perbandingan(metrics_payload, scaler_X, scaler_y, manual_fis, ga_
         {"age": [float(age)], "bmi": [float(bmi)], "smoker": [float(smoker)]}
     )
     pred_raw = predict_models_on_frame(feature_df, scaler_X, scaler_y, manual_fis, ga_fis, ann_model).iloc[0].to_dict()
-    pred_rows = [
-        {"Method": key, "Predicted Charges (USD)": round(float(value), 2)}
-        for key, value in pred_raw.items()
-    ]
-    pred_df = pd.DataFrame(pred_rows).sort_values("Predicted Charges (USD)", ascending=False)
+
+    st.markdown("<div class='input-result-gap'></div>", unsafe_allow_html=True)
 
     c1, c2, c3 = st.columns(3)
-    c1.metric("Manual FIS", f"${pred_raw['Manual FIS']:,.2f}")
-    c2.metric("GA-Tuned FIS", f"${pred_raw['GA-Tuned FIS']:,.2f}")
-    c3.metric("NeuroFuzzy ANN", f"${pred_raw['NeuroFuzzy ANN']:,.2f}")
+    with c1:
+        st.caption("Predicted Charges (USD)")
+        st.metric("Manual FIS", f"${pred_raw['Manual FIS']:,.2f}")
+    with c2:
+        st.caption("Predicted Charges (USD)")
+        st.metric("GA-Tuned FIS", f"${pred_raw['GA-Tuned FIS']:,.2f}")
+    with c3:
+        st.caption("Predicted Charges (USD)")
+        st.metric("NeuroFuzzy ANN", f"${pred_raw['NeuroFuzzy ANN']:,.2f}")
 
-    spread = float(pred_df["Predicted Charges (USD)"].max() - pred_df["Predicted Charges (USD)"].min())
-    st.caption(f"Spread antar model: ${spread:,.2f}")
-    st.dataframe(pred_df, use_container_width=True, hide_index=True)
-    st.altair_chart(chart_pred_bar(pred_df), use_container_width=True)
-
-    render_section_divider()
-
-    metrics_df = get_metrics_frame(metrics_payload)
-    if metrics_df is None:
-        st.warning("metrics.json belum tersedia. Jalankan: python scripts/train_and_save_artifacts.py")
-    else:
-        render_section_marker("Metrik Test")
-        st.dataframe(metrics_df, use_container_width=True, hide_index=True)
-        st.altair_chart(chart_error_metrics(metrics_df), use_container_width=True)
+    avg_pred = float(np.mean(list(pred_raw.values())))
+    st.caption(f"Rata-rata estimasi charges: ${avg_pred:,.2f}")
 
     render_section_divider()
 
@@ -310,7 +215,7 @@ def render_tab_perbandingan(metrics_payload, scaler_X, scaler_y, manual_fis, ga_
     curve_df = pd.concat([sim_df[[x_col]].reset_index(drop=True), pred_curve], axis=1)
     curve_long = curve_df.melt(id_vars=[x_col], var_name="Method", value_name="Predicted Charges")
 
-    curve_chart = (
+    curve_chart = apply_chart_theme(
         alt.Chart(curve_long)
         .mark_line(strokeWidth=3)
         .encode(
@@ -322,6 +227,52 @@ def render_tab_perbandingan(metrics_payload, scaler_X, scaler_y, manual_fis, ga_
         .properties(height=380)
     )
     st.altair_chart(curve_chart, use_container_width=True)
+
+    render_section_divider()
+    render_section_marker("Actual vs Predicted (Sejajar)")
+    st.caption("Perbandingan prediksi terhadap nilai actual untuk ketiga model pada seluruh dataset.")
+
+    eval_df = df[["age", "bmi", "smoker", "charges"]].reset_index(drop=True)
+    eval_preds = predict_models_on_frame(
+        eval_df[["age", "bmi", "smoker"]],
+        scaler_X,
+        scaler_y,
+        manual_fis,
+        ga_fis,
+        ann_model,
+    )
+    eval_df = pd.concat([eval_df, eval_preds], axis=1)
+
+    model_cols = ["Manual FIS", "GA-Tuned FIS", "NeuroFuzzy ANN"]
+    min_val = float(min(eval_df["charges"].min(), eval_df[model_cols].min().min()))
+    max_val = float(max(eval_df["charges"].max(), eval_df[model_cols].max().max()))
+    line_df = pd.DataFrame({"x": [min_val, max_val], "y": [min_val, max_val]})
+    x_domain = [min_val, max_val]
+    y_domain = [min_val, max_val]
+
+    plot_cols = st.columns(3)
+    for col, model_name in zip(plot_cols, model_cols):
+        scatter_df = pd.DataFrame(
+            {
+                "Actual": eval_df["charges"].astype(float),
+                "Predicted": eval_df[model_name].astype(float),
+            }
+        )
+        points = (
+            alt.Chart(scatter_df)
+            .mark_circle(size=34, opacity=0.5)
+            .encode(
+                x=alt.X("Actual:Q", title="Actual", scale=alt.Scale(domain=x_domain)),
+                y=alt.Y("Predicted:Q", title="Predicted", scale=alt.Scale(domain=y_domain)),
+                tooltip=[
+                    alt.Tooltip("Actual:Q", format=",.2f"),
+                    alt.Tooltip("Predicted:Q", format=",.2f"),
+                ],
+            )
+        )
+        diagonal = alt.Chart(line_df).mark_line(strokeDash=[8, 6], color="#111111").encode(x="x:Q", y="y:Q")
+        chart = apply_chart_theme((points + diagonal).properties(height=320, title=model_name))
+        col.altair_chart(chart, use_container_width=True)
 
 
 def render_tab_eda(df):
@@ -358,7 +309,7 @@ def render_tab_eda(df):
 
     sc1, sc2 = st.columns(2)
 
-    age_scatter = (
+    age_scatter = apply_chart_theme(
         alt.Chart(scatter_df)
         .mark_circle(size=45, opacity=0.65)
         .encode(
@@ -371,7 +322,7 @@ def render_tab_eda(df):
     )
     sc1.altair_chart(age_scatter, use_container_width=True)
 
-    bmi_scatter = (
+    bmi_scatter = apply_chart_theme(
         alt.Chart(scatter_df)
         .mark_circle(size=45, opacity=0.65)
         .encode(
@@ -397,7 +348,7 @@ def render_tab_eda(df):
     )
     st.dataframe(smoker_summary, use_container_width=True, hide_index=True)
 
-    smoker_bar = (
+    smoker_bar = apply_chart_theme(
         alt.Chart(smoker_summary)
         .mark_bar(cornerRadiusTopLeft=8, cornerRadiusTopRight=8)
         .encode(
@@ -411,95 +362,13 @@ def render_tab_eda(df):
     st.altair_chart(smoker_bar, use_container_width=True)
 
 
-def render_tab_batch_eval(df, scaler_X, scaler_y, manual_fis, ga_fis, ann_model):
-    render_section_marker(
-        "Evaluasi Batch dan Insight",
-        "Bandingkan prediksi ketiga model terhadap nilai actual pada sampel dataset.",
-    )
-
-    sample_size = st.slider(
-        "Jumlah data evaluasi",
-        min_value=100,
-        max_value=len(df),
-        value=min(400, len(df)),
-        step=50,
-    )
-
-    eval_btn = st.button("Run Batch Evaluation")
-    if eval_btn:
-        eval_df = df.sample(n=sample_size, random_state=42).reset_index(drop=True)
-        model_preds = predict_models_on_frame(eval_df[["age", "bmi", "smoker"]], scaler_X, scaler_y, manual_fis, ga_fis, ann_model)
-        st.session_state["batch_eval_df"] = pd.concat([eval_df, model_preds], axis=1)
-
-    if "batch_eval_df" not in st.session_state:
-        st.info("Klik Run Batch Evaluation untuk menampilkan hasil evaluasi batch.")
-        return
-
-    batch_df = st.session_state["batch_eval_df"]
-    err_df = compute_batch_error_table(batch_df)
-    render_section_divider()
-    render_section_marker("Ringkasan Error")
-    st.dataframe(err_df.round(4), use_container_width=True, hide_index=True)
-
-    err_chart_df = err_df.melt(id_vars=["Method"], value_vars=["MAE (USD)", "RMSE (USD)"], var_name="Metric", value_name="Value")
-    err_chart = (
-        alt.Chart(err_chart_df)
-        .mark_bar(cornerRadiusTopLeft=6, cornerRadiusTopRight=6)
-        .encode(
-            x=alt.X("Method:N", title="Model"),
-            y=alt.Y("Value:Q", title="Error (USD)"),
-            color=alt.Color("Metric:N", title="Metric"),
-            xOffset="Metric:N",
-            tooltip=["Method", "Metric", alt.Tooltip("Value:Q", format=",.2f")],
-        )
-        .properties(height=320)
-    )
-    st.altair_chart(err_chart, use_container_width=True)
-
-    render_section_divider()
-    render_section_marker("Actual vs Predicted")
-    selected_model = st.selectbox(
-        "Pilih model",
-        options=["Manual FIS", "GA-Tuned FIS", "NeuroFuzzy ANN"],
-        index=2,
-    )
-
-    scatter_df = pd.DataFrame(
-        {
-            "Actual": batch_df["charges"].astype(float),
-            "Predicted": batch_df[selected_model].astype(float),
-        }
-    )
-
-    min_val = float(min(scatter_df["Actual"].min(), scatter_df["Predicted"].min()))
-    max_val = float(max(scatter_df["Actual"].max(), scatter_df["Predicted"].max()))
-    line_df = pd.DataFrame({"x": [min_val, max_val], "y": [min_val, max_val]})
-
-    points = (
-        alt.Chart(scatter_df)
-        .mark_circle(size=45, opacity=0.55)
-        .encode(
-            x=alt.X("Actual:Q", title="Actual Charges (USD)"),
-            y=alt.Y("Predicted:Q", title="Predicted Charges (USD)"),
-            tooltip=[alt.Tooltip("Actual:Q", format=",.2f"), alt.Tooltip("Predicted:Q", format=",.2f")],
-        )
-    )
-    diagonal = alt.Chart(line_df).mark_line(strokeDash=[8, 6], color="#111111").encode(x="x:Q", y="y:Q")
-    st.altair_chart((points + diagonal).properties(height=380), use_container_width=True)
-
-    render_section_divider()
-    render_section_marker("Sampel Hasil Prediksi")
-    preview_cols = ["age", "bmi", "smoker", "charges", "Manual FIS", "GA-Tuned FIS", "NeuroFuzzy ANN"]
-    st.dataframe(batch_df[preview_cols].head(20).round(2), use_container_width=True)
-
-
 def main():
     apply_custom_style()
     st.title("Insurance Charges Prediction Dashboard")
     st.caption("Deployment model Manual FIS, GA-Tuned FIS, dan NeuroFuzzy ANN dengan navigasi tab.")
 
     try:
-        scaler_X, scaler_y, manual_fis, ga_fis, ann_model, metrics = load_artifacts()
+        scaler_X, scaler_y, manual_fis, ga_fis, ann_model, _metrics = load_artifacts()
     except FileNotFoundError as e:
         st.error(str(e))
         st.code("python scripts/train_and_save_artifacts.py")
@@ -507,22 +376,18 @@ def main():
 
     df = load_data_for_eda()
 
-    tab1, tab2, tab3 = st.tabs(
+    tab1, tab2 = st.tabs(
         [
             "Perbandingan Model",
             "EDA Dataset",
-            "Evaluasi Batch",
         ]
     )
 
     with tab1:
-        render_tab_perbandingan(metrics, scaler_X, scaler_y, manual_fis, ga_fis, ann_model)
+        render_tab_perbandingan(df, scaler_X, scaler_y, manual_fis, ga_fis, ann_model)
 
     with tab2:
         render_tab_eda(df)
-
-    with tab3:
-        render_tab_batch_eval(df, scaler_X, scaler_y, manual_fis, ga_fis, ann_model)
 
 
 if __name__ == "__main__":

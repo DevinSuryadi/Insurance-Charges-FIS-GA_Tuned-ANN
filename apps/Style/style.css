@@ -1,11 +1,11 @@
 :root {
-    --bg: #0b1220;
-    --surface: #111a2b;
-    --surface-2: #162238;
-    --text: #e7edf7;
-    --muted: #9aa7b7;
-    --line: #2a3953;
-    --accent: #6ea8fe;
+    --bg: #ffffff;
+    --surface: #ffffff;
+    --surface-2: #f6f8fb;
+    --text: #111827;
+    --muted: #6b7280;
+    --line: #e5e7eb;
+    --accent: #111111;
 }
 
 html,
@@ -17,7 +17,7 @@ body,
 }
 
 [data-testid="stHeader"] {
-    background: rgba(11, 18, 32, 0.92);
+    background: rgba(255, 255, 255, 0.94);
     border-bottom: 1px solid var(--line);
 }
 
@@ -63,6 +63,10 @@ span {
     border-color: var(--accent);
 }
 
+[data-testid="stTabs"] [role="tab"] p {
+    color: #1f2937;
+}
+
 [data-testid="stMetric"] {
     background: var(--surface);
     border: 1px solid var(--line);
@@ -76,6 +80,31 @@ span {
     border-radius: 10px;
     overflow: hidden;
     background: var(--surface);
+}
+
+[data-testid="stDataFrame"] * {
+    color: #111827 !important;
+}
+
+[data-testid="stDataFrame"] [role="grid"],
+[data-testid="stDataFrame"] [data-testid="StyledDataFrameResizable"],
+[data-testid="stDataFrame"] [data-testid="stDataFrameGlideDataEditor"] {
+    background: #ffffff !important;
+}
+
+[data-testid="stDataFrame"] [role="columnheader"],
+[data-testid="stDataFrame"] [role="gridcell"],
+[data-testid="stDataFrame"] [data-testid="stDataFrameToolbar"] {
+    background: #ffffff !important;
+    color: #111827 !important;
+}
+
+[data-testid="stTable"] table,
+[data-testid="stTable"] thead tr th,
+[data-testid="stTable"] tbody tr td {
+    background: #ffffff !important;
+    color: #111827 !important;
+    border-color: #e5e7eb !important;
 }
 
 details[data-testid="stExpander"] {
@@ -98,6 +127,39 @@ hr {
     background: var(--surface);
 }
 
+[data-baseweb="select"] > div {
+    color: #111827 !important;
+    border-color: #111827 !important;
+}
+
+[data-baseweb="select"] input,
+[data-baseweb="select"] span,
+[data-baseweb="select"] p,
+[data-baseweb="select"] div {
+    color: #111827 !important;
+    -webkit-text-fill-color: #111827 !important;
+    opacity: 1 !important;
+}
+
+[data-baseweb="select"] svg {
+    fill: #111827 !important;
+    color: #111827 !important;
+}
+
+div[role="listbox"] {
+    background: #ffffff !important;
+    border: 1px solid #111827 !important;
+}
+
+div[role="option"] {
+    background: #ffffff !important;
+    color: #111827 !important;
+}
+
+div[role="option"][aria-selected="true"] {
+    background: #f3f4f6 !important;
+}
+
 .stCaption,
 [data-testid="stCaptionContainer"] p {
     color: var(--muted);
@@ -110,4 +172,28 @@ hr {
 
 [data-testid="stVerticalBlock"] > div:has(> [data-testid="stMetric"]) {
     gap: 0.8rem;
+}
+
+.input-result-gap {
+    height: 0.8rem;
+}
+
+div.stButton > button {
+    background: #ffffff;
+    color: #111827;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+div.stButton > button:hover {
+    background: #f9fafb;
+    color: #111827;
+    border-color: #9ca3af;
+}
+
+div.stButton > button:focus {
+    color: #111827;
+    border-color: #9ca3af;
+    box-shadow: 0 0 0 0.18rem rgba(156, 163, 175, 0.25);
 }
